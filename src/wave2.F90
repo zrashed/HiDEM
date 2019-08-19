@@ -156,7 +156,7 @@
 	SI%S = SI%S * SI%SCL
 	MN=SCL**3.0*SI%RHO
 	JS=SCL**2.0*MN/6.0
-	LNN=SCL*1.1225  
+	LNN=SCL*1.1225
 	SI%MLOAD=SCL*SI%MLOAD
 
 	PI=ACOS(-1.0)
@@ -180,7 +180,7 @@
 	BCC=0
 	BCE=0.0
 	DPE=0.0
-	DMPEN=0.0	
+	DMPEN=0.0
 	PSUM=0.0
 	BDE=0.0
 	END IF
@@ -204,7 +204,7 @@
 
         !Read the geometry and friction
         !into the grids BED, SUF, and FBED
-        
+
         grid_bbox(1) = HUGE(grid_bbox(1))
         grid_bbox(2) = -HUGE(grid_bbox(1))
         grid_bbox(3) = HUGE(grid_bbox(1))
@@ -300,14 +300,14 @@
 
 	RY0=1
 
-!TODO - automatically translate and rotate the input data 
+!TODO - automatically translate and rotate the input data
 !     (interp required <- either at load time or within BIPINT)
 !     Write out translation and rotation matrices to REST?
 
         !Go to glas.f90 to make the grid
 	CALL FIBG3(SI,BASE,SUF,origin,NN,NTOT,NANS,NRXF,NANPart, &
           InvPartInfo, neighcount,melange_data)
- 
+
         IF(DebugMode) PRINT *,myid,' made it out of FIBG3 alive!'
         MYMAXZ = MAXVAL(NRXF%M(3,:))
         MYMAXY = MAXVAL(NRXF%M(2,:))
@@ -364,7 +364,7 @@
         !and works out whether to randomise or receive the EFS value
         ALLOCATE(EFS(NTOT))
         DO I=1,NTOT
-          
+
           aboveShearLine = .TRUE.
           IF(SI%doShearLine) THEN
             N1 = NANS(1,I)
@@ -404,7 +404,7 @@
 
    !TODO - not sure that NRXF%PartInfo etc is correctly filled in here...
 
-        INQUIRE( FILE=TRIM(wrkdir)//'/'//TRIM(SI%restname)//'_REST0'//na(myid), EXIST=FileExists ) 
+        INQUIRE( FILE=TRIM(wrkdir)//'/'//TRIM(SI%restname)//'_REST0'//na(myid), EXIST=FileExists )
         IF(.NOT. FileExists) CALL FatalError("Running with too many cores!&
              &(some restart files don't exist)")
 
@@ -480,7 +480,7 @@
         END DO
 	CLOSE (117+myid)
 
-        !Construct InvPartInfo 
+        !Construct InvPartInfo
         CALL InvPartInfoInit(InvPartInfo, PartIsNeighbour)
 
         DO I=NRXF%cstrt, NRXF%cstrt + NRXF%NC - 1
@@ -513,9 +513,9 @@
         CALL ExchangeConnPoints(NANS, NRXF, InvPartInfo, UT, UTM)
         IF(DebugMode)  PRINT *,myid,' finished exchange.'
 
-        END IF 
+        END IF
 
-        
+
 
 ! ============== END IF RESTART ==============
 
@@ -562,9 +562,9 @@
 	X=NRXF%M(1,I)+UT%M(6*I-5)
         Y=NRXF%M(2,I)+UT%M(6*I-4)
         Z=NRXF%M(3,I)+UT%M(6*I-3)
-        
+
         Zb = InterpRast(X,Y,BED,GRID,origin,INTERP_MISS_NEAREST)
-        
+
         !Pure bed contact
         IF (ABS(ZB-Z).LT.SCL*1.5) THEN
 
@@ -601,7 +601,7 @@
 
 	END DO
 
- 
+
 
 
 !============================================================
@@ -682,13 +682,13 @@
 !New strategy:
 ! 1) Use BBoxes to determine possible prox swaps (list of prox neighbour parts)
 ! 2) Swap nearby pionts using ExchangeProxPoints
-! 3) Store those NRXF/UT values somehow?   <- issue - we don't want to swap NRXF every 
+! 3) Store those NRXF/UT values somehow?   <- issue - we don't want to swap NRXF every
 !                                             time, but sometimes NEW prox points will make this necessary
 ! 4) Use octree search to search for collision/interaction (no need for every 250 steps malarky)
 !
 ! Make use of InvPartInfo to confirm which points we already have/which we need
-! Note - do we need to use ExchangeConnPoints separately here, or do they form part of the same strategy? 
-  
+! Note - do we need to use ExchangeConnPoints separately here, or do they form part of the same strategy?
+
       ! dest=myid+1
       ! source=myid-1
 
@@ -914,7 +914,7 @@
             GSUM=GSUM+0.5*BIntC*(ZB+SCL/2.0-Z)**2
             BDE=BDE + 0.5*BedDampConst*DZ**2
           ELSE
-            !BI is BIntC * the overlap between particle 
+            !BI is BIntC * the overlap between particle
             !        and bed accounting for non-horizontality
             BI = BIntC * ((ZB + (SCL/2.0)/DIZ - Z) * DIZ)
             !Velocity normal to the surface
@@ -1008,8 +1008,8 @@
 
           !Freeze if near back plane
           IF(SI%FixBack) THEN
-            IF(SI%GeomMasked) THEN 
-              !geommask goes from 0:nx-1, 0:ny-1 
+            IF(SI%GeomMasked) THEN
+              !geommask goes from 0:nx-1, 0:ny-1
               !ensure within bounds
               xmin = MIN(MAX(XIND,0),nx-1)
               ymin = MIN(MAX(YIND-(2*gridratio),0),ny-1)
@@ -1018,7 +1018,7 @@
                 UTP(6*I-5)=UT%M(6*I-5)
                 UTP(6*I-4)=UT%M(6*I-4)
               END IF
-            ELSE 
+            ELSE
               IF(YIND <= 2*gridratio) THEN
                 UTP(6*I-5)=UT%M(6*I-5)
                 UTP(6*I-4)=UT%M(6*I-4)
@@ -1040,6 +1040,9 @@
           END IF
         END IF
 
+        !Translation of entire glacier
+        UTP(6*I-4) = UT%M(6*I-4)+10
+
        !Compute drag/friction energy
 	DMPEN=DMPEN+VDP(I)*(UTP(6*I-5)-UTM%M(6*I-5))**2/(4*DT)
 	DMPEN=DMPEN+VDP(I)*(UTP(6*I-4)-UTM%M(6*I-4))**2/(4*DT)
@@ -1047,7 +1050,7 @@
 	DMPEN=DMPEN+VDP(I)*(UTP(6*I-2)-UTM%M(6*I-2))**2/(4*DT)
 	DMPEN=DMPEN+VDP(I)*(UTP(6*I-1)-UTM%M(6*I-1))**2/(4*DT)
 	DMPEN=DMPEN+VDP(I)*(UTP(6*I-0)-UTM%M(6*I-0))**2/(4*DT)
- 
+
 
        !Calculate all the energy and sum over partitions
 
@@ -1070,10 +1073,10 @@
         END IF
        END DO !loop over particles
 
-       IF(DebugMode) PRINT *, myid,'going to check solution' 
+       IF(DebugMode) PRINT *, myid,'going to check solution'
        ! !Check for particles leaving the domain, travelling suspiciously quickly, etc
        CALL CheckSolution(SI,NRXF,UT,UTP,NN,NTOT,NANS,EFS,grid_bbox,IsLost,IsOutlier)
-       IF(DebugMode) PRINT *, myid,'done check solution' 
+       IF(DebugMode) PRINT *, myid,'done check solution'
 
 
 !-------------- Gather and write energy -----------------
@@ -1127,7 +1130,7 @@
         END IF
 
 	T=T+DT
-	
+
 	MML=0.0
 
         IF(PrintTimes) THEN
