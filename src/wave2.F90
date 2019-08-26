@@ -1165,6 +1165,13 @@
 	 BCC=BCC+1
 	 ENDIF
         ENDIF
+        IF (T.GT.SI%fractime) THEN
+              IF ((((NRXF%A(2,N1)).GT.(MAXY-(RY*MAXY/(SI%STEPS0)))).OR.&
+              (NRXF%A(2,N2).GT.MAXY-((RY*MAXY/(SI%STEPS0))))).AND.&
+              (((NRXF%A(2,N1)).GT.(LNN+MAXY-(RY*MAXY/(SI%STEPS0)))).OR.&
+              (NRXF%A(2,N2).GT.LNN+MAXY-((RY*MAXY/(SI%STEPS0))))).AND.
+              (NRXF%A(3,N1).LT.0.2*MAXZ.OR.NRXF%A(3,N2).LT.0.2*MAXZ)) EFS(I)=0.0
+              ENDIF
  	END DO
 
 !--------------- Output to files ----------------------
