@@ -1,4 +1,4 @@
-! *************************************************************************
+cd ! *************************************************************************
 ! *  HiDEM, A Discrete Element Model for Fracture Simulation
 ! *  Copyright (C) 24th May 2018 - Jan Åström
 ! *
@@ -1161,17 +1161,23 @@
 	IF (LOAD.GT.MML) MML=LOAD
 	 IF (LOAD.GT.SI%MLOAD.AND.T.GT.SI%fractime) THEN
 	 BCE=BCE+0.5*EFS(I)*SI%S**2/LNN*(DL-L)**2
-         EFS(I)=0.0
+   EFS(I)=0.0
 	 BCC=BCC+1
 	 ENDIF
         ENDIF
-        IF (T.GT.SI%fractime) THEN
-              IF ((((NRXF%A(2,N1)).GT.(MAXY-(RY*MAXY/(SI%STEPS0)))).OR.&
-              (NRXF%A(2,N2).GT.MAXY-((RY*MAXY/(SI%STEPS0))))).AND.&
-              (((NRXF%A(2,N1)).GT.(LNN+MAXY-(RY*MAXY/(SI%STEPS0)))).OR.&
-              (NRXF%A(2,N2).GT.LNN+MAXY-((RY*MAXY/(SI%STEPS0))))).AND.
-              (NRXF%A(3,N1).LT.0.2*MAXZ.OR.NRXF%A(3,N2).LT.0.2*MAXZ)) EFS(I)=0.0
-              ENDIF
+  IF (T > SI%fractime) THEN
+    IF ((((NRXF%A(2,N1).GT.(MAXY-(RY*MAXY/(SI%STEPS0))+(SI%fractime/(SI%DT*SI%STEPS0)))).AND.&
+	    (NRXF%A(2,N1).LT.(1.1*MAXY-(RY*MAXY/(SI%STEPS0))+(SI%fractime/(SI%DT*SI%STEPS0))))).OR.&
+	    ((NRXF%A(2,N2).GT.(MAXY-(RY*MAXY/(SI%STEPS0))+(SI%fractime/(SI%DT*SI%STEPS0)))).AND.&
+	    (NRXF%A(2,N2).LT.(1.1*MAXY-(RY*MAXY/(SI%STEPS0))+(SI%fractime/(SI%DT*SI%STEPS0)))))).AND.&
+	    (NRXF%A(3,N1).LT.0.2*MAXZ.OR.NRXF%A(3,N2).LT.0.2*MAXZ)) THEN
+    !Breaks bonds of particles in melt box and gives them a forward velocity (flush out)
+    EFS(I)=0.0
+    UTP(6*N1-4) = UTP(6*N1-4)+3*SCL
+    UTP(6*N2-4) = UTP(6*N2-4)+3*SCL
+    BCC=BCC+1
+    ENDIF
+  ENDIF
  	END DO
 
 !--------------- Output to files ----------------------
