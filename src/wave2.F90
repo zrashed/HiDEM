@@ -799,6 +799,14 @@ cd ! *************************************************************************
 !          ENDIF
 !	ENDIF
 
+      IF (Y.GT.4*SCL+MAXY) THEN
+        IF (Z.GT.0.8*WL+Y*SSB.AND.Z.LT.1.2*WL+Y*SSB) THEN
+             WSY(I)=-SI%PRESS*0.5*RHOW*GRAV*WL*(SCL/2)**2*PI
+             PSUM=PSUM+WSY(I)*(UT%M(6*I-4)-UTM%M(6*I-4))
+        ENDIF
+      ENDIF
+
+
 	WSX(I)=0.0
 
         !Compute vars for repeat bilinear interpolation
@@ -1041,7 +1049,7 @@ cd ! *************************************************************************
         END IF
 
         !Translation of entire glacier
-        UTP(6*I-4) = UT%M(6*I-4)+10
+        !UTP(6*I-4) = UT%M(6*I-4)+10
 
        !Compute drag/friction energy
 	DMPEN=DMPEN+VDP(I)*(UTP(6*I-5)-UTM%M(6*I-5))**2/(4*DT)
@@ -1166,18 +1174,20 @@ cd ! *************************************************************************
 	 ENDIF
         ENDIF
   IF (T > SI%fractime) THEN
-    IF ((((NRXF%A(2,N1).GT.(MAXY-(RY*MAXY/(SI%STEPS0))+(SI%fractime/(SI%DT*SI%STEPS0)))).AND.&
-	    (NRXF%A(2,N1).LT.(1.1*MAXY-(RY*MAXY/(SI%STEPS0))+(SI%fractime/(SI%DT*SI%STEPS0))))).OR.&
-	    ((NRXF%A(2,N2).GT.(MAXY-(RY*MAXY/(SI%STEPS0))+(SI%fractime/(SI%DT*SI%STEPS0)))).AND.&
-	    (NRXF%A(2,N2).LT.(1.1*MAXY-(RY*MAXY/(SI%STEPS0))+(SI%fractime/(SI%DT*SI%STEPS0)))))).AND.&
-	    (NRXF%A(3,N1).LT.0.2*MAXZ.OR.NRXF%A(3,N2).LT.0.2*MAXZ)) THEN
-    !Breaks bonds of particles in melt box and gives them a forward velocity (flush out)
-    EFS(I)=0.0
-    UTP(6*N1-4) = UTP(6*N1-4)+3*SCL
-    UTP(6*N2-4) = UTP(6*N2-4)+3*SCL
-    BCC=BCC+1
-    ENDIF
+    IF ((((NRXF%A(2,N1).GT.(3*SCL+MAXY-(MAXY*(((T-SI%fractime)/SI%DT)/SI%STEPS0))).AND.&
+      (NRXF%A(2,N1).LT.(4*SCL+MAXY-(MAXY*(((T-SI%fractime)/SI%DT)/SI%STEPS0))))).OR.&
+      ((NRXF%A(2,N2).GT.(3*SCL+MAXY-(MAXY*(((T-SI%fractime)/SI%DT)/SI%STEPS0)))).AND.&
+      (NRXF%A(2,N2).LT.(4*SCL+MAXY-(MAXY*(((T-SI%fractime)/SI%DT)/SI%STEPS0)))))).AND.&
+      (NRXF%A(3,N1).LT.0.2*MAXZ.OR.NRXF%A(3,N2).LT.0.2*MAXZ)) THEN
+     !Breaks bonds of particles in melt box and gives them a forward
+     !velocity (flush out)
+      EFS(I)=0.0
+      UTP(6*N1-4) = UTP(6*N1-4)+3*SCL
+      UTP(6*N2-4) = UTP(6*N2-4)+3*SCL
+      BCC=BCC+1
+   ENDIF
   ENDIF
+
  	END DO
 
 !--------------- Output to files ----------------------
